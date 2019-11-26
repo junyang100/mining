@@ -15,9 +15,9 @@
    <!--  测试环境日志配置       -->
 	<springProfile name="test">
 		<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-			<file>/logs/web_app/clwbd-eureka-server/clwbd-eureka-server.log</file>
+			<file>/logs/eureka-server/eureka-server.log</file>
 			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-				<fileNamePattern>/logs/clwbd-eureka-server/clwbd-eureka-server/clwbd-eureka-server.log-%d{yyyy-MM-dd}</fileNamePattern>
+				<fileNamePattern>/logs/eureka-server/eureka-server.log-%d{yyyy-MM-dd}</fileNamePattern>
 			</rollingPolicy>
 			<encoder>
 				<pattern>${LOG_PATTERN}</pattern>
@@ -32,9 +32,9 @@
 	<!--  生产环境日志设置       -->
 	<springProfile name="prod">
 		<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-			<file>/logs/web_app/clwbd-eureka-server/clwbd-eureka-server.log</file>
+			<file>/logs/eureka-server/eureka-server.log</file>
 			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-				<fileNamePattern>/logs/web_app/clwbd-eureka-server/clwbd-eureka-server.log-%d{yyyy-MM-dd}</fileNamePattern>
+				<fileNamePattern>/logs/eureka-server/eureka-server.log-%d{yyyy-MM-dd}</fileNamePattern>
 			</rollingPolicy>
 			<encoder>
 				<pattern>${LOG_PATTERN}</pattern>

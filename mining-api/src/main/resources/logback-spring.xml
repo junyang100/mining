@@ -17,9 +17,9 @@
     <!--  测试环境日志配置       -->
     <springProfile name="test">
         <appender name="INFOFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/logs/web_app/${APP_NAME}/${APP_NAME}.log</file>
+            <file>/logs/${APP_NAME}/${APP_NAME}.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>/logs/web_app/${APP_NAME}/${APP_NAME}.log-%d{yyyy-MM-dd}</fileNamePattern>
+                <fileNamePattern>/logs/${APP_NAME}/${APP_NAME}.log-%d{yyyy-MM-dd}</fileNamePattern>
             </rollingPolicy>
             <encoder>
                 <pattern>%d|%thread|%X{ThreadID}|%-5level|%logger{65}|%msg%n</pattern>
@@ -32,9 +32,9 @@
             </filter>
         </appender>
         <appender name="ERRORFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/logs/web_app/${APP_NAME}/error.log</file>
+            <file>/logs/${APP_NAME}/error.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>/logs/web_app/${APP_NAME}/error.log-%d{yyyy-MM-dd}</fileNamePattern>
+                <fileNamePattern>/logs/${APP_NAME}/error.log-%d{yyyy-MM-dd}</fileNamePattern>
             </rollingPolicy>
             <encoder>
                 <pattern>%d|%thread|%X{ThreadID}|%-5level|%logger{65}|%msg%n</pattern>
@@ -55,9 +55,9 @@
     <!--  生产环境日志设置 -->
     <springProfile name="prod">
         <appender name="INFOFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/logs/web_app/${APP_NAME}/${APP_NAME}.log</file>
+            <file>/logs/${APP_NAME}/${APP_NAME}.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>/logs/web_app/${APP_NAME}/${APP_NAME}.log-%d{yyyy-MM-dd}</fileNamePattern>
+                <fileNamePattern>/logs/${APP_NAME}/${APP_NAME}.log-%d{yyyy-MM-dd}</fileNamePattern>
             </rollingPolicy>
             <encoder>
                 <pattern>%d|%thread|%X{ThreadID}|%-5level|%logger{65}|%msg%n</pattern>
@@ -70,9 +70,9 @@
             </filter>
         </appender>
         <appender name="ERRORFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/logs/web_app/${APP_NAME}/error.log</file>
+            <file>/logs/${APP_NAME}/error.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>/logs/web_app/${APP_NAME}/error.log-%d{yyyy-MM-dd}</fileNamePattern>
+                <fileNamePattern>/logs/${APP_NAME}/error.log-%d{yyyy-MM-dd}</fileNamePattern>
             </rollingPolicy>
             <encoder>
                 <pattern>%d|%thread|%X{ThreadID}|%-5level|%logger{65}|%msg%n</pattern>
