@@ -11,9 +11,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * Created by admin on 2019/11/26.
- */
+
 public class MD5Util {
 
     public static String md5(String string) {

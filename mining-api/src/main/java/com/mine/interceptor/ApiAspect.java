@@ -18,8 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * 统一拦截切面
  */
@@ -43,9 +41,15 @@ public class ApiAspect {
     public Object doAround(ProceedingJoinPoint pjp, ApiAnnotation annotation) throws Throwable {
         long start = System.currentTimeMillis();
         String method = getTargetMethod(pjp);
+        // 校验签名
         if (annotation.checkSign() && !verifySign()) {
             return transformResult(ApiResult.fail(ErrorMsg.SIGN_ERROR));
         }
+        // 校验登陆
+        if (annotation.needLogin()) {
+            //todo
+        }
+        // 执行业务
         Object[] args = pjp.getArgs();
         Object rs;
         try {
@@ -68,7 +72,7 @@ public class ApiAspect {
         try {
             return MD5Util.verifySign(authKey, attributes.getRequest());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("verifySign.error", e);
         }
         return false;
     }
