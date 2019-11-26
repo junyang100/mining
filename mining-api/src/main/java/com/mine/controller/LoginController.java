@@ -19,7 +19,7 @@ public class LoginController {
     @Autowired
     private LoginService loginService;
 
-    @ApiAnnotation(needLogin = false)
+    @ApiAnnotation(needLogin = false, checkSign = false)
     @RequestMapping("/login")
     public ApiResult login() {
         String rs = loginService.login(new UserLoginReq());

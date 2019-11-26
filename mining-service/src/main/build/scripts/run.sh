@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROFILE=''
-MAIN_CLASS=com.sinoiov.lhjh.AuthsServerApplication
+MAIN_CLASS=com.mine.MineApplication
 #脚本所在目录
 cd `dirname $0`
 #BIN目路

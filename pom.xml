@@ -12,6 +12,7 @@
         <module>mining-service</module>
         <module>mining-eureka</module>
         <module>mining-interface</module>
+        <module>mining-starter-druid</module>
     </modules>
 
     <properties>
