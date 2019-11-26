@@ -7,13 +7,7 @@ package com.mine.constant;
 public enum ErrorMsg {
     SUCCESS("0", "success"),
     FAIL("-1", "fail"),
-    URL_ERROR("10000", "url.error"),
-    REQUEST_OSS_ERROR("10001", "request.oss.error"),
-    RESPONSE_OSS_ERROR("10002", "response.oss.error"),
-    UPLOAD_FILE_EMPTY("10003", "upload.file.empty"),
-    RESULT_ERROR("10004", "result.error"),
-    BIZTYPE_ERROR("10005", "biz.type.error"),
-    BIZTYPE_CONF_ERROR("10006", "biz.type.conf.error");
+    SIGN_ERROR("10000", "sign.error");
 
     /**
      * 错误码

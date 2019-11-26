@@ -18,15 +18,10 @@ public @interface ApiAnnotation {
      */
     boolean checkSign() default true;
 
-    /**
-     * 接收参数类型
-     * @return
-     */
-    Class<?> paramType();
 
     /**
      * 是否需要传递head
      * @return
      */
-    boolean needHead() default false;
+    boolean needLogin() default true;
 }

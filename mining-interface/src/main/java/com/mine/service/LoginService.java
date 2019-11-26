@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 
 @FeignClient(name = "${feignclient.mineService.name}", configuration = FeignClientConfig.class)
-public interface MineService {
+public interface LoginService {
 
     @RequestMapping("/login")
     String login(@RequestBody UserLoginReq req);

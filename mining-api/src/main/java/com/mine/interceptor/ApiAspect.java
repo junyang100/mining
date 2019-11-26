@@ -1,7 +1,9 @@
 package com.mine.interceptor;
 
 import com.alibaba.fastjson.JSON;
+import com.mine.common.MD5Util;
 import com.mine.common.MessageUtils;
+import com.mine.constant.ErrorMsg;
 import com.mine.exception.BizException;
 import com.mine.vo.ApiResult;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -13,6 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 统一拦截切面
@@ -33,10 +39,13 @@ public class ApiAspect {
     public void pointCut() {
     }
 
-    @Around("pointCut()")
-    public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
+    @Around("pointCut()&& @annotation(annotation)")
+    public Object doAround(ProceedingJoinPoint pjp, ApiAnnotation annotation) throws Throwable {
         long start = System.currentTimeMillis();
         String method = getTargetMethod(pjp);
+        if (annotation.checkSign() && !verifySign()) {
+            return transformResult(ApiResult.fail(ErrorMsg.SIGN_ERROR));
+        }
         Object[] args = pjp.getArgs();
         Object rs;
         try {
@@ -54,6 +63,15 @@ public class ApiAspect {
         return rs;
     }
 
+    private boolean verifySign() {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        try {
+            return MD5Util.verifySign(authKey, attributes.getRequest());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     private Object transformResult(Object obj) {
         try {

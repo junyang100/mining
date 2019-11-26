@@ -2,7 +2,7 @@ package com.mine.controller;
 
 import com.mine.interceptor.ApiAnnotation;
 import com.mine.pojo.UserLoginReq;
-import com.mine.service.MineService;
+import com.mine.service.LoginService;
 import com.mine.vo.ApiResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +17,12 @@ public class LoginController {
     private static Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
-    private MineService mineService;
+    private LoginService loginService;
 
-    @ApiAnnotation(paramType = UserLoginReq.class)
+    @ApiAnnotation(needLogin = false)
     @RequestMapping("/login")
     public ApiResult login() {
-        String rs = mineService.login(new UserLoginReq());
+        String rs = loginService.login(new UserLoginReq());
         return ApiResult.success(rs);
     }
 }

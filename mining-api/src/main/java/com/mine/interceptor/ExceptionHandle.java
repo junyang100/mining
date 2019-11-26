@@ -24,6 +24,7 @@ public class ExceptionHandle {
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
     public String handle(Exception e) {
+        logger.error("Exception:", e);
         return null;
     }
 }

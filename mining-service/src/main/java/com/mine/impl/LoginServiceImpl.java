@@ -1,11 +1,11 @@
 package com.mine.impl;
 
 import com.mine.pojo.UserLoginReq;
-import com.mine.service.MineService;
+import com.mine.service.LoginService;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class MineServiceImpl implements MineService {
+public class LoginServiceImpl implements LoginService {
 
     @Override
     public String login(UserLoginReq req) {
