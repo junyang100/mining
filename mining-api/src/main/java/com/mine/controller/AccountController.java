@@ -16,7 +16,7 @@ public class AccountController {
 
     private static Logger logger = LoggerFactory.getLogger(AccountController.class);
 
-    @ApiAnnotation
+    @ApiAnnotation(checkSign = false, needLogin = false)
     @RequestMapping("/info")
     public ApiResult accountInfo(AccountReq req) {
         System.out.println(JSON.toJSONString(req));
