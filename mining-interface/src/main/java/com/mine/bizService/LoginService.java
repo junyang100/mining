@@ -1,4 +1,4 @@
-package com.mine.service;
+package com.mine.bizService;
 
 import com.mine.config.FeignClientConfig;
 import com.mine.pojo.UserLoginReq;

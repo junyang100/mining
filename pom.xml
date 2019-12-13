@@ -16,6 +16,7 @@
         <module>mining-wallet</module>
         <module>mining-wallet-hd</module>
         <module>mining-common</module>
+        <module>mining-common-client</module>
     </modules>
 
     <properties>

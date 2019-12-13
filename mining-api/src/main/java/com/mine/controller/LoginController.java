@@ -2,7 +2,7 @@ package com.mine.controller;
 
 import com.mine.interceptor.ApiAnnotation;
 import com.mine.pojo.UserLoginReq;
-import com.mine.service.LoginService;
+import com.mine.bizService.LoginService;
 import com.mine.vo.ApiResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

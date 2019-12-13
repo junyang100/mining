@@ -2,7 +2,7 @@ package com.mine.impl;
 
 import com.mine.mapper.UserMapper;
 import com.mine.pojo.UserLoginReq;
-import com.mine.service.LoginService;
+import com.mine.bizService.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
