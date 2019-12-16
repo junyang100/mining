@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mine.mapper.UserPrivillegeMapper" >
+
+  <resultMap id="BaseResultMap" type="com.mine.bean.UserPrivillege" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="privilege_id" property="privilegeId" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, user_id, privilege_id, create_time
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tr_users_privillege
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <!--   根据用户id删除用户数据权限       -->
+  <delete id="deleteByUserId" parameterType="java.lang.Integer" >
+    delete from tr_users_privillege
+    where user_id = #{userId,jdbcType=BIGINT}
+  </delete>
+
+  <!--   根据权限id删除用户数据权限       -->
+  <delete id="deleteByPrivilegeId" parameterType="java.lang.String" >
+    delete from tr_users_privillege
+    where privilege_id = #{privilegeId,jdbcType=BIGINT}
+  </delete>
+
+  <!--   插入用户权限     -->
+  <insert id="insert" parameterType="com.mine.bean.UserPrivillege" >
+    insert into tr_users_privillege (user_id, privilege_id)
+    values (#{userId,jdbcType=INTEGER}, #{privilegeId,jdbcType=INTEGER})
+  </insert>
+
+  <!--      批量插入      -->
+  <insert id="batchInsert" parameterType="map" >
+       insert into tr_users_privillege (user_id, privilege_id)
+       values
+       <foreach collection="list" separator="," item="item">
+         (#{item.userId,jdbcType=INTEGER}, #{item.privilegeId,jdbcType=INTEGER})
+       </foreach>
+  </insert>
+
+  <!--  查询某个用户的权限    -->
+  <select id="selectPrivilegeByUserId" resultMap="BaseResultMap" parameterType="int" >
+    select  <include refid="Base_Column_List" /> from  tr_users_privillege rp
+    where rp.user_id = #{userId}
+  </select>
+
+</mapper>

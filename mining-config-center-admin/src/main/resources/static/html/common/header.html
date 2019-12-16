@@ -1,0 +1,141 @@
+<div class="layui-logo"><i class="layui-icon">&#xe614;</i>车联网大数据 - 配置中心</div>
+<ul class="layui-nav layui-layout-left" id="menuContainer">
+
+</ul>
+<ul class="layui-nav layui-layout-right">
+    <li class="layui-nav-item">
+        <a href="javascript:;">
+            <img src="/image/head.jpg" class="layui-nav-img"><span id="nickName" >我</span></a>
+        </a>
+        <dl class="layui-nav-child">
+            <dd><a href="javascript:modifypwd()">修改密码</a></dd>
+            <dd><a href="javascript:logout()">注销</a></dd>
+        </dl>
+    </li>
+</ul>
+<script type="text/javascript">
+    function logout(){
+        $.post("/user/logout", function(data) {
+            if(data.status == 200){
+                location.href = "/login.html";
+            }else{
+                layer.msg(data.msg);
+            }
+        });
+    }
+
+    function modifypwd(){
+        layer.open({
+            type: 1,
+            title: '修改密码',
+            type:1,
+            anim:5,
+            btnAlign: 'r', //按钮居中
+            closeBtn:2,
+            area:['500px','300px'],
+            scrollbar: false,
+            shadeClose: true,
+            btnAlign: 'r',
+            btn: ['立即提交', '关闭'],
+            yes: function(index, layero){
+                 if($("#passwordOld").val() == ""){
+                     layer.msg('旧密码不能为空！');
+                     return false;
+                 }
+
+                if($("#passwordNew").val() == ""){
+                    layer.msg('新密码不能为空！');
+                    return false;
+                }
+
+                if($("#passwordNewConfirm").val() == ""){
+                    layer.msg('确认新密码不能为空！');
+                    return false;
+                }
+
+                 if($('#passwordNew').val() != $('#passwordNewConfirm').val()) {
+                     layer.msg('两次输入密码不一致!');
+                     return false;
+                 }
+                $.post('/user/modifyPwd',{
+                    'passwordSha1':sha1($("#passwordOld").val()),
+                    'passwordsha1New':sha1($("#passwordNew").val())
+                },function(result){
+                    if(result.status == 200){
+                        layer.close(index);
+                        layer.msg('密码修改成功!', {icon: 1});
+                    }else{
+                        layer.msg(result.msg);
+                    }
+                });
+
+                return false;
+            },
+            content: '<form class="layui-form"  id="modifyPwdDiv" style="width: 500px;">\n' +
+            '    <div class="layui-form-item">\n' +
+            '        <label class="layui-form-label"><span style="color: red; font-weight: 400;">*</span>旧密码</label>\n' +
+            '        <div class="layui-input-block">\n' +
+            '            <input type="password" id="passwordOld" name="passwordOld" lay-verify="required" placeholder="请输入旧密码" autocomplete="off" class="layui-input">\n' +
+            '        </div>\n' +
+            '    </div>\n' +
+            '    <div class="layui-form-item">\n' +
+            '        <label class="layui-form-label"><span style="color: red; font-weight: 400;">*</span>新密码</label>\n' +
+            '        <div class="layui-input-block">\n' +
+            '            <input type="password" id="passwordNew" name="passwordNew" lay-verify="required" placeholder="请输入新密码" autocomplete="off" class="layui-input">\n' +
+            '        </div>\n' +
+            '    </div>\n' +
+            '\n' +
+            '    <div class="layui-form-item">\n' +
+            '        <label class="layui-form-label"><span style="color: red; font-weight: 400;">*</span>确认新密码</label>\n' +
+            '        <div class="layui-input-block">\n' +
+            '            <input type="password" id="passwordNewConfirm" name="passwordNewConfirm" lay-verify="required" placeholder="请输确认新密码" autocomplete="off" class="layui-input">\n' +
+            '        </div>\n' +
+            '    </div>\n' +
+            '</form>'
+        });
+    }
+
+
+    function createMenu(){
+        $.post("/menu/queryUserMenu",{},function(result){
+            if(result.status == 200){
+                var menuData = result.data;
+                for(var i = 0;i < menuData.length;i++){
+                    var menuHtml = "<li class='layui-nav-item'>";
+                    var processedUrl = menuData[i].menuAction == "-1" ? "javascript:;;" : menuData[i].menuAction;
+                    var menuA = "<a href='"+processedUrl+"' >"
+                        + menuData[i].menuDisplayname +
+                        "</a>"
+                    menuHtml = menuHtml + menuA;
+                    var childrenMenus = menuData[i].childrenMenu;
+                    if(childrenMenus &&  childrenMenus.length > 0){
+                        menuHtml = menuHtml + "<dl class=\"layui-nav-child\">";
+                        for(var j = 0; j < childrenMenus.length;j++){
+                            menuHtml = menuHtml + "<dd>" +
+                                "<a href='" + childrenMenus[j].menuAction + "'>" +
+                                childrenMenus[j].menuDisplayname
+                            "</a>" +
+                            "</dd>";
+                        }
+                        menuHtml = menuHtml + "</dl>";
+                    }
+                    menuHtml = menuHtml+ "</li>"
+                    console.log(menuHtml);
+                    $("#menuContainer").append(menuHtml);
+                }
+            }else{
+                layer.msg(result.msg);
+            }
+        });
+    }
+    createMenu();
+
+    function setUserInfo(){
+        $.post("/user/queryUserInfo",{},function(result) {
+            if(result.status == 200){
+                $("#nickName").text(result.data.nickName);
+            }
+        });
+    }
+    setUserInfo();
+</script>

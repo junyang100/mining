@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mine.mapper.MenuMapper" >
+
+  <resultMap id="BaseResultMap" type="com.mine.bean.Menu" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="menu_name" property="menuName" jdbcType="VARCHAR" />
+    <result column="menu_parent" property="menuParent" jdbcType="INTEGER" />
+    <result column="menu_action" property="menuAction" jdbcType="VARCHAR" />
+    <result column="menu_order" property="menuOrder" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="menu_displayname" property="menuDisplayname" jdbcType="VARCHAR" />
+    <association property="parentMenu" columnPrefix="ca_" resultMap="BaseResultMap" />
+  </resultMap>
+
+  <resultMap id="assoMap" type="com.mine.bean.Menu" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="menu_name" property="menuName" jdbcType="VARCHAR" />
+    <result column="menu_action" property="menuAction" jdbcType="VARCHAR" />
+    <result column="menu_displayname" property="menuDisplayname" jdbcType="VARCHAR" />
+    <collection property="childrenMenu" columnPrefix="pre_" resultMap="assoMap"  />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    m.id, m.menu_name, m.menu_parent, m.menu_action, m.menu_order, m.create_time, m.update_time, m.menu_displayname
+  </sql>
+
+  <sql id="pageWhere">
+    <where>
+      <if test="menuName != null" >
+        and (
+          c.menu_name like concat('%',#{menuName},'%')
+          or  c.menu_displayname like concat('%',#{menuDisplayname},'%')
+        )
+      </if>
+      <if test="menuAction != null" >
+        and c.menu_action like concat('%',#{menuAction},'%')
+      </if>
+    </where>
+  </sql>
+
+
+  <!--   根据用户id查询用户的所有菜单         -->
+  <select id="selectMenuByUserId" resultMap="assoMap" parameterType="Integer" >
+      select p.id,p.menu_name,p.menu_action,p.menu_displayname,
+      c.id as pre_id,c.menu_name as pre_menu_name,c.menu_action as pre_menu_action
+      ,c.menu_displayname as pre_menu_displayname
+      from tb_menus p left outer join tb_menus c on p.id = c.menu_parent
+      inner join tr_users_menu trm
+      on (c.id = trm.menu_id or (p.id = trm.menu_id and c.id is null and p.menu_parent = 0 ))
+      where trm.user_id = #{userId}
+      order by p.menu_order asc,c.menu_order asc
+  </select>
+
+  <!--   查询所有菜单         -->
+  <select id="selectTreeMenus" resultMap="assoMap"  >
+      select p.id,p.menu_name,p.menu_action,p.menu_displayname, c.id as pre_id,c.menu_name as pre_menu_name,c.menu_action as pre_menu_action ,c.menu_displayname as pre_menu_displayname
+      from tb_menus p left outer join tb_menus c on p.id = c.menu_parent
+    where (c.id is not null or p.menu_parent = 0)
+    order by p.menu_order asc,c.menu_order asc
+  </select>
+
+  <!--  分页查询菜单     -->
+  <select id="selectMenuByCondition" parameterType="com.mine.bean.Menu" resultMap="BaseResultMap" >
+    select c.id,c.menu_name,c.menu_displayname,c.menu_action,c.update_time,c.create_time,
+    c.menu_order,c.menu_parent,p.id as ca_id,
+    p.menu_action as ca_menu_action,p.menu_displayname as  ca_menu_displayname,p.menu_order as ca_menu_order
+    from tb_menus c left join tb_menus p on c.menu_parent = p.id
+    <include refid="pageWhere" />
+    LIMIT #{offset} , #{limit}
+  </select>
+
+
+  <!--  查询符合条件的记录的数量   -->
+  <select id="selectCountByCondition" parameterType="com.mine.bean.Menu"  resultType="int" >
+    select count(*) from tb_menus c <include refid="pageWhere" />
+  </select>
+
+
+  <select id="selectAllParentMenu"  resultMap="BaseResultMap" >
+    select <include refid="Base_Column_List" /> from
+     tb_menus m where m.menu_parent = 0
+  </select>
+
+  <!--   插入菜单       -->
+  <insert id="insert" parameterType="com.mine.bean.Menu" >
+    insert into tb_menus (menu_name, menu_parent,
+      menu_action, menu_order, menu_displayname)
+    values (#{menuName,jdbcType=VARCHAR}, #{menuParent,jdbcType=INTEGER},
+      #{menuAction,jdbcType=VARCHAR}, #{menuOrder,jdbcType=INTEGER},#{menuDisplayname,jdbcType=VARCHAR})
+  </insert>
+
+  <!--    更新菜单     -->
+  <update id="updateByPrimaryKeySelective" parameterType="com.mine.bean.Menu" >
+    update tb_menus
+    <set >
+      <if test="menuName != null" >
+        menu_name = #{menuName,jdbcType=VARCHAR},
+      </if>
+      <if test="menuParent != null" >
+        menu_parent = #{menuParent,jdbcType=INTEGER},
+      </if>
+      <if test="menuAction != null" >
+        menu_action = #{menuAction,jdbcType=VARCHAR},
+      </if>
+      <if test="menuOrder != null" >
+        menu_order = #{menuOrder,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="menuDisplayname != null" >
+        menu_displayname = #{menuDisplayname,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <!--   根据主键删除菜单   -->
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_menus
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+</mapper>

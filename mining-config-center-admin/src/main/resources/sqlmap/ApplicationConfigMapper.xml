@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mine.mapper.ApplicationConfigMapper">
+
+  <resultMap id="BaseResultMap" type="com.mine.bean.ApplicationConfig">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="application" jdbcType="VARCHAR" property="application" />
+    <result column="profile" jdbcType="VARCHAR" property="profile" />
+    <result column="profile_desc" jdbcType="VARCHAR" property="profileDesc" />
+    <result column="label" jdbcType="VARCHAR" property="label" />
+    <result column="key" jdbcType="VARCHAR" property="key" />
+    <result column="value" jdbcType="VARCHAR" property="value" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="config_group" jdbcType="VARCHAR" property="configGroup" />
+    <result column="label_desc" jdbcType="VARCHAR" property="labelDesc" />
+    <result column="platform" jdbcType="VARCHAR" property="platform" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, application, profile, profile_desc, label, `key`, `value`, description, create_time,
+    update_time, config_group, label_desc, platform
+  </sql>
+
+  <sql id="pageWhere">
+    <where>
+      <include refid="privilgeSql" />
+      <if test="configGroup != null and configGroup.trim().length() > 0">
+        and config_group like concat('%',#{configGroup},'%')
+      </if>
+      <if test="key != null and key.trim().length() > 0">
+        and `key` like concat('%',#{key},'%')
+      </if>
+      <if test="profile != null and profile.trim().length() > 0">
+        and profile like concat('%',#{profile},'%')
+      </if>
+    </where>
+  </sql>
+
+   <!--   权限控制sql   -->
+   <sql id="privilgeSql">
+       application in
+       <foreach collection="applications" item="item" separator="," open="(" close=")" >
+           #{item}
+       </foreach>
+   </sql>
+
+ <!--  分页查询配置    -->
+ <select id="list" parameterType="com.mine.bean.ApplicationConfig"  resultMap="BaseResultMap">
+   select  <include refid="Base_Column_List" /> from properties
+    <include refid="pageWhere" />
+    order by application,`key` LIMIT #{offset},#{limit}
+ </select>
+
+  <!--   分页查询条数      -->
+  <select id="count" resultType="int" parameterType="com.mine.bean.ApplicationConfig" >
+        select count(*) from properties
+        <include refid="pageWhere" />
+  </select>
+
+
+  <!--   插入配置到数据库    -->
+  <insert id="add" parameterType="com.mine.bean.ApplicationConfig">
+  insert into properties (application, profile,
+  profile_desc, label, `key`,
+  `value`, description, create_time,
+  update_time, config_group, label_desc,
+  platform)
+  values (#{application,jdbcType=VARCHAR}, #{profile,jdbcType=VARCHAR},
+  #{profileDesc,jdbcType=VARCHAR}, #{label,jdbcType=VARCHAR}, #{key,jdbcType=VARCHAR},
+  #{value,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+  #{updateTime,jdbcType=TIMESTAMP}, #{configGroup,jdbcType=VARCHAR}, #{labelDesc,jdbcType=VARCHAR},
+  #{platform,jdbcType=VARCHAR})
+  </insert>
+
+  <!--  删除某个属性   -->
+  <delete id="delete" parameterType="com.mine.bean.ApplicationConfig" >
+    delete from properties where id = #{id} and <include refid="privilgeSql" />
+  </delete>
+
+  <!-- 更新应用配置    -->
+  <update id="update" parameterType="com.mine.bean.ApplicationConfig">
+    update properties
+    <set>
+      <if test="application != null">
+        application = #{application,jdbcType=VARCHAR},
+      </if>
+      <if test="profile != null">
+        profile = #{profile,jdbcType=VARCHAR},
+      </if>
+      <if test="profileDesc != null">
+        profile_desc = #{profileDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="label != null">
+        label = #{label,jdbcType=VARCHAR},
+      </if>
+      <if test="key != null">
+        `key` = #{key,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null">
+        `value` = #{value,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="configGroup != null">
+        config_group = #{configGroup,jdbcType=VARCHAR},
+      </if>
+      <if test="labelDesc != null">
+        label_desc = #{labelDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="platform != null">
+        platform = #{platform,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER} and <include refid="privilgeSql" />
+  </update>
+
+  <!--  复制某个版本的数据   -->
+  <insert id="duplicate" parameterType="map">
+    INSERT INTO `properties`(`application`, `profile`, `profile_desc`, `label`, `key`, `value`, `description`, `create_time`, `update_time`, `config_group`, `label_desc`, `platform`)
+    select `application`, `profile`, `profile_desc`,#{newLabel}, `key`, `value`, `description`, #{createTime},#{createTime},`config_group`, `label_desc`, `platform` from properties
+    where `application`= #{application} and label = #{oldLabel} and profile in(#{profile},'default')
+  </insert>
+
+    <!--    查询某个应用的应用的配置   -->
+    <select id="selectAppUsedConfig"  parameterType="com.mine.bean.ApplicationConfig"  resultMap="BaseResultMap">
+        SELECT
+        t.*
+    FROM
+        (
+            SELECT application,profile,label,`KEY`,`VALUE`,
+            CASE WHEN PROFILE = 'default' THEN 1 ELSE 2 END AS env,
+            CASE WHEN label = '1.0.0' THEN 1 ELSE 2 END AS la
+          FROM properties WHERE APPLICATION = 'common'
+        AND PROFILE IN ('default',#{profile}) and LABEL in(#{label},'1.0.0')
+        <if test="key != null and key.trim().length() > 0">
+            and `key` like concat('%',#{key},'%')
+        </if>
+        order by env asc,la asc
+        ) t
+
+      union all
+
+      SELECT t.*
+      FROM
+        (
+            SELECT application,profile,label,`KEY`,`VALUE`,
+            CASE WHEN PROFILE = 'default' THEN 1 ELSE 2 END AS env,
+            CASE WHEN label = '1.0.0' THEN 1 ELSE 2 END AS la
+          FROM properties
+        WHERE APPLICATION = #{platform}
+         AND PROFILE IN ('default',#{profile}) and LABEL in(#{label},'1.0.0')
+        <if test="key != null and key.trim().length() > 0">
+            and `key` like concat('%',#{key},'%')
+        </if>
+         order by env asc,la asc
+        ) t
+
+        UNION ALL
+
+        SELECT t.*
+            FROM
+                (
+                    SELECT application,profile,label,`KEY`,`VALUE`,
+                    CASE WHEN PROFILE = 'default' THEN 1 ELSE 2 END AS env,
+                    CASE WHEN label = '1.0.0' THEN 1 ELSE 2 END AS la
+                FROM properties
+                WHERE APPLICATION = #{application}
+                AND PROFILE in('default',#{profile}) and LABEL in(#{label},'1.0.0')
+                <if test="key != null and key.trim().length() > 0">
+                    and `key` like concat('%',#{key},'%')
+                </if>
+                order by env asc,la asc
+                ) t
+  </select>
+
+    <!--   查询某个应用的平台    -->
+    <select id="selectAppPlatform" parameterType="string" resultType="string" >
+          select platform from application where id = #{application}
+    </select>
+
+
+</mapper>
