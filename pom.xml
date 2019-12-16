@@ -15,6 +15,9 @@
         <module>mining-starter-druid</module>
         <module>mining-common</module>
         <module>mining-common-client</module>
+        <module>mining-config-center</module>
+        <module>mining-config-center-admin</module>
+        <module>mining-starter-config-center</module>
     </modules>
 
     <properties>
