@@ -26,9 +26,9 @@ public class WalletFrontService {
 
     @RequestMapping(value = "/address", method = RequestMethod.POST)
     @ResponseBody
-    HdResult<AddressResp> getAddress(@RequestBody AddressReq req){
+    HdResult<AddressResp> getAddress(AddressReq req){
         try {
-            String key = FileUtils.readFromFile("/Users/gaoyang/key.txt");
+            String key = FileUtils.readFromFile("D:\\key.txt");
             ExtendedKey extendedKey = ExtendedKey.parse(key);
             Key master3 = extendedKey.getMaster();
             BitCoinECKeyPair parse2 = BitCoinECKeyPair.parse(master3, true);
@@ -40,7 +40,7 @@ public class WalletFrontService {
                     .coinType(CoinTypes.BitcoinTest)
                     .account(0)
                     .external()
-                    .address(0);
+                    .address(1);
             CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
             ECKeyPair pairBtc = coinKeyPair.derive(btc);
 
@@ -61,13 +61,13 @@ public class WalletFrontService {
 
     @RequestMapping(value = "/sign", method = RequestMethod.POST)
     @ResponseBody
-    HdResult<SignResp> sign(@RequestBody SignReq req){
+    HdResult<SignResp> sign(SignReq req){
         try {
             //1. 通过 tx 转换
             Transaction transaction= new BTCTransaction(HexUtils.fromHex("01000000013814c518646cc8040cfc5e0e03022b0bdaf705bacde10ff924da473e67d569df0000000000ffffffff0280969800000000001976a914073126b0fd55e5551257f6e17e7a8082a5b1ca3988ac00093d00000000001976a9147023b06ab19d25ede77fe77c2de67510f6b9b68388ac00000000"));// HexUtils.fromHex(str) 可以转换
             System.out.println(JSON.toJSONString(transaction));
             //签名
-            String key = FileUtils.readFromFile("/Users/gaoyang/key.txt");
+            String key = FileUtils.readFromFile("D:\\key.txt");
             ExtendedKey extendedKey = ExtendedKey.parse(key);
             Key master1 = extendedKey.getMaster();
             BitCoinECKeyPair parse = BitCoinECKeyPair.parse(master1, true);

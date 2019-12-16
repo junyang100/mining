@@ -38,7 +38,7 @@ public class WalletController {
         try {
             ExtendedKey extendedKey = ExtendedKey.create(seed);
             String key = extendedKey.serialize(false);
-            FileUtils.writeToFile("/Users/gaoyang/key.txt",key);
+            FileUtils.writeToFile("D:\\key.txt",key);
         } catch (Exception e) {
             e.printStackTrace();
         }
