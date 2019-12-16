@@ -13,7 +13,6 @@
         <module>mining-eureka</module>
         <module>mining-interface</module>
         <module>mining-starter-druid</module>
-        <module>mining-wallet-hd</module>
         <module>mining-common</module>
         <module>mining-common-client</module>
     </modules>
