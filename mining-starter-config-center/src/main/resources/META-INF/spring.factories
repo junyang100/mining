@@ -1,0 +1,10 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.mine.autoconfigure.ZKConfigRefreshAutoConfiguration,\
+com.mine.share.ShareConfiguration,\
+com.mine.autoconfigure.KafkaRefresherAutoConfiguration,\
+com.mine.autoconfigure.HttpRefresherAutoConfiguration
+
+# Bootstrap components
+org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+com.mine.share.LocalCachePropertyLocatorBootstrapConfiguration

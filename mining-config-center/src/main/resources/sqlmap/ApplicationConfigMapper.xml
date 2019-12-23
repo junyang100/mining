@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mine.mapper.ApplicationConfigMapper">
+
+  <resultMap id="BaseResultMap" type="com.mine.bean.ApplicationConfig">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="application" jdbcType="VARCHAR" property="application" />
+    <result column="profile" jdbcType="VARCHAR" property="profile" />
+    <result column="profile_desc" jdbcType="VARCHAR" property="profileDesc" />
+    <result column="label" jdbcType="VARCHAR" property="label" />
+    <result column="key" jdbcType="VARCHAR" property="key" />
+    <result column="value" jdbcType="VARCHAR" property="value" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="config_group" jdbcType="VARCHAR" property="configGroup" />
+    <result column="label_desc" jdbcType="VARCHAR" property="labelDesc" />
+    <result column="platform" jdbcType="VARCHAR" property="platform" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, application, profile, profile_desc, label, `key`, `value`, description, create_time,
+    update_time, config_group, label_desc, platform
+  </sql>
+
+  <!--   应用启动时，加载配置,不能修改顺序，这里依靠sql顺序去替换相同key的value     -->
+  <select id="selectAppConfig"  parameterType="com.mine.bean.ApplicationConfig"  resultType="map">
+        SELECT
+        t.`KEY`,
+        t.`VALUE`
+    FROM
+        (
+            SELECT `KEY`,`VALUE`,
+            CASE WHEN PROFILE = 'default' THEN 1 ELSE 2 END AS env,
+            CASE WHEN label = '1.0.0' THEN 1 ELSE 2 END AS la
+          FROM properties WHERE APPLICATION = 'common'
+        AND PROFILE IN ('default',#{profile}) and LABEL in(#{label},'1.0.0') order by env asc,la asc
+        ) t
+
+      union all
+
+      SELECT t.`KEY`,t.`VALUE` FROM
+        (
+            SELECT `KEY`,`VALUE`,
+            CASE WHEN PROFILE = 'default' THEN 1 ELSE 2 END AS env,
+            CASE WHEN label = '1.0.0' THEN 1 ELSE 2 END AS la
+          FROM properties
+        WHERE APPLICATION = #{platform}
+         AND PROFILE IN ('default',#{profile}) and LABEL in(#{label},'1.0.0') order by env asc,la asc
+        ) t
+
+        UNION ALL
+
+        SELECT
+        t.`KEY`,
+        t.`VALUE`
+            FROM
+                (
+                    SELECT `KEY`,`VALUE`,
+                    CASE WHEN PROFILE = 'default' THEN 1 ELSE 2 END AS env,
+                    CASE WHEN label = '1.0.0' THEN 1 ELSE 2 END AS la
+                FROM properties
+                WHERE APPLICATION = #{application}
+                AND PROFILE in('default',#{profile}) and LABEL in(#{label},'1.0.0') order by env asc,la asc
+                ) t
+  </select>
+    <!--   查询某个应用的平台    -->
+    <select id="selectAppPlatform" parameterType="string" resultType="string" >
+          select platform from application where id = #{application}
+    </select>
+</mapper>

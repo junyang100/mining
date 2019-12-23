@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mine.mapper.UserMapper" >
+
+  <resultMap id="BaseResultMap" type="com.mine.bean.User" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="password_sha1" property="passwordSha1" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="SMALLINT" />
+    <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, user_name,status, nick_name, create_time, update_time
+  </sql>
+
+  <sql id="userPageWhere">
+      <where>
+        <if test="userName != null and userName.trim().length() > 0">
+              and user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="nickName != null and nickName.trim().length() > 0">
+          and nick_name like concat('%',#{nickName},'%')
+        </if>
+      </where>
+  </sql>
+
+  <!--   根据条件查询用户信息      -->
+  <select id="selectByCondition" resultMap="BaseResultMap" parameterType="com.mine.bean.User" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_users
+    <include refid="userPageWhere" />
+    limit #{offset},#{limit}
+  </select>
+
+  <!--   查询分页数据      -->
+  <select id="selectCount"  parameterType="com.mine.bean.User"  resultType="int">
+    select count(*) from tb_users <include refid="userPageWhere" />
+  </select>
+
+  <!--   根据用户名查询用户信息      -->
+  <select id="selectByUsername" resultMap="BaseResultMap" parameterType="string" >
+    select id, user_name,password_sha1,status, nick_name, create_time, update_time
+    from tb_users
+    where user_name = #{userName,jdbcType=VARCHAR}
+  </select>
+
+  <!--     插入用户信息      -->
+  <insert id="insert" parameterType="com.mine.bean.User" >
+    insert into tb_users (user_name, password_sha1,
+      nick_name)
+    values (#{userName,jdbcType=VARCHAR}, #{passwordSha1,jdbcType=VARCHAR},
+       #{nickName,jdbcType=VARCHAR})
+  </insert>
+
+  <!--  更新用户信息   -->
+  <update id="updateByPrimaryKeySelective" parameterType="com.mine.bean.User" >
+    update tb_users
+    <set >
+      <if test="userName != null" >
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="passwordSha1 != null" >
+        password_sha1 = #{passwordSha1,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=SMALLINT},
+      </if>
+      <if test="nickName != null" >
+        nick_name = #{nickName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <!--  删除用户  -->
+  <delete id="deleteByPrimaryKey" parameterType="com.mine.bean.User" >
+    delete from tb_users where id = #{id}
+  </delete>
+
+
+</mapper>

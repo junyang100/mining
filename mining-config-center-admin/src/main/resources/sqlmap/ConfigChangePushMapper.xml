@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mine.mapper.ConfigChangePushMapper" >
+  <resultMap id="BaseResultMap" type="com.mine.bean.ConfigChangePush" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="application" property="application" jdbcType="VARCHAR" />
+    <result column="application_ip" property="applicationIp" jdbcType="VARCHAR" />
+    <result column="application_port" property="applicationPort" jdbcType="INTEGER" />
+    <result column="push_status" property="pushStatus" jdbcType="TINYINT" />
+    <result column="push_time" property="pushTime" jdbcType="TIMESTAMP" />
+    <result column="push_finish_time" property="pushFinishTime" jdbcType="TIMESTAMP" />
+    <result column="push_user_name" property="pushUserName" jdbcType="VARCHAR" />
+    <result column="push_description" property="pushDescription" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, application, application_ip, application_port, push_status, push_time, push_finish_time, 
+    push_user_name,push_description
+  </sql>
+
+  <sql id="pageWhere">
+    <where>
+       <if test="application != null and application.trim().length() > 0">
+           and application = #{application}
+       </if>
+       <if test="pushStatus != null">
+           and push_status = #{pushStatus}
+       </if>
+       <if test="beginTimeStr != null and beginTimeStr.trim().length() > 0">
+           and push_time >= str_to_date(#{beginTimeStr},'%Y-%m-%d %T')
+       </if>
+        <if test="endTimeStr != null and endTimeStr.trim().length() > 0">
+            <![CDATA[
+               and push_time <= str_to_date(#{endTimeStr},'%Y-%m-%d %T')
+              ]]>
+        </if>
+    </where>
+  </sql>
+
+  <!--   查询记录总条数     -->
+  <select id="selectPageCount" parameterType="com.mine.bean.ConfigChangePush" resultType="int">
+        select count(*) from config_change_push  <include refid="pageWhere" />
+  </select>
+
+  <!--   查询分页记录数量       -->
+  <select id="selectPage" parameterType="com.mine.bean.ConfigChangePush" resultMap="BaseResultMap">
+     select  <include refid="Base_Column_List" /> from config_change_push
+     <include refid="pageWhere" />  order by push_time desc  LIMIT #{offset},#{limit}
+  </select>
+
+  <insert id="persist" parameterType="com.mine.bean.ConfigChangePush"  useGeneratedKeys="true"   keyProperty="id">
+    insert into config_change_push (application, application_ip,
+    application_port, push_status, push_time,push_user_name,push_description)
+    values(#{application,jdbcType=VARCHAR}, #{applicationIp,jdbcType=VARCHAR},
+      #{applicationPort,jdbcType=INTEGER}, #{pushStatus,jdbcType=TINYINT}, #{pushTime,jdbcType=TIMESTAMP},
+      #{pushUserName,jdbcType=VARCHAR},#{pushDescription,jdbcType=VARCHAR})
+  </insert>
+
+</mapper>

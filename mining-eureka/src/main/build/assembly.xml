@@ -1,0 +1,49 @@
+<assembly>
+    <id>bin</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <fileSets>
+        <!-- bin 目录 -->
+        <fileSet>
+            <directory>${build.dir}/scripts</directory>
+            <includes>
+                <include>*.sh</include>
+                <include>*.txt</include>
+            </includes>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+
+        <!-- conf 目录 -->
+        <fileSet>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>*.properties</include>
+                <include>*.xml</include>
+                <include>*.yaml</include>
+            </includes>
+            <outputDirectory>conf</outputDirectory>
+            <fileMode>0644</fileMode>
+        </fileSet>
+        <!-- 著作权、readme、版本说明 -->
+        <fileSet>
+            <directory>src/main/assembly/script</directory>
+            <includes>
+                <include>readme.txt</include>
+            </includes>
+            <outputDirectory>/</outputDirectory>
+            <fileMode>0644</fileMode>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
+        <!-- jar包目路 -->
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <excludes>
+                <exclude>org.springframework.boot:spring-boot-devtools</exclude>
+            </excludes>
+        </dependencySet>
+    </dependencySets>
+</assembly>

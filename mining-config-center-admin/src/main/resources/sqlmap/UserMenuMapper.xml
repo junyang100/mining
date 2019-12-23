@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mine.mapper.UserMenuMapper" >
+
+  <!--  根据用户id删除 用户已经分配的菜单   -->
+  <delete id="deleteByUserId" parameterType="java.lang.Integer" >
+    delete from tr_users_menu
+    where user_id = #{userId,jdbcType=BIGINT}
+  </delete>
+
+  <!--  根据用户id删除 用户已经分配的菜单   -->
+  <delete id="deleteByMenuId" parameterType="java.lang.Integer" >
+    delete from tr_users_menu
+    where menu_id = #{menuId}
+  </delete>
+
+  <!--   插入用户菜单关联     -->
+  <insert id="insert" parameterType="com.mine.bean.UserMenu" >
+    insert into tr_users_menu (user_id, menu_id)
+    values (#{userId,jdbcType=INTEGER}, #{menuId,jdbcType=INTEGER}
+      )
+  </insert>
+
+
+  <!--   批量插入用户关联   -->
+  <insert id="batchInsert" parameterType="map" >
+    insert into tr_users_menu (user_id, menu_id) values
+    <foreach collection="list" separator="," item="item">
+      (#{item.userId,jdbcType=INTEGER}, #{item.menuId,jdbcType=INTEGER})
+    </foreach>
+  </insert>
+
+
+</mapper>
