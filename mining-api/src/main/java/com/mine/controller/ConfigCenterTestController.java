@@ -19,7 +19,7 @@ public class ConfigCenterTestController {
 
     private static Logger logger = LoggerFactory.getLogger(ConfigCenterTestController.class);
 
-    @Value("${com.mining.demo}")
+//    @Value("${com.mining.demo}")
     private String val;
 
     @ApiAnnotation(needLogin = false, checkSign = false)
