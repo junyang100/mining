@@ -1,5 +1,6 @@
 package im;
 
+import com.sun.corba.se.impl.protocol.giopmsgheaders.MessageBase;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -16,9 +17,16 @@ public class IMClient {
     static final int PORT = Integer.parseInt(System.getProperty("port", "6666"));
     static final int SIZE = Integer.parseInt(System.getProperty("size", "256"));
 
-    public static void main(String[] args) throws Exception {
+    private static SocketChannel socketChannel;
 
+    public static void main(String[] args) throws Exception {
+        start();
+        sendMsg("Hello Netty Server ,I am a common client");
         // Configure the client.
+
+    }
+
+    public static void start(){
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();
@@ -34,13 +42,19 @@ public class IMClient {
                             p.addLast(new IMHandler());
                         }
                     });
-
             ChannelFuture future = b.connect(HOST, PORT).sync();
-            future.channel().writeAndFlush("Hello Netty Server ,I am a common client");
+//            future.channel().writeAndFlush("Hello Netty Server ,I am a common client");
+            socketChannel = (SocketChannel) future.channel();
             future.channel().closeFuture().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         } finally {
             group.shutdownGracefully();
         }
+    }
+
+    public static void sendMsg(String msg) {
+        socketChannel.writeAndFlush(msg);
     }
 
 }
