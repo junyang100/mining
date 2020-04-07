@@ -18,6 +18,7 @@
         <module>mining-config-center</module>
         <module>mining-config-center-admin</module>
         <module>mining-starter-config-center</module>
+        <module>mining-im</module>
     </modules>
 
     <properties>
