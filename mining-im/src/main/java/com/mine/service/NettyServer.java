@@ -22,7 +22,6 @@ public class NettyServer {
     private Channel channel;
 
     public ChannelFuture run(InetSocketAddress address) {
-
         ChannelFuture f = null;
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -43,7 +42,6 @@ public class NettyServer {
                 log.error("Netty server start up Error!");
             }
         }
-
         return f;
     }
 

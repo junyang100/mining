@@ -9,9 +9,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 
-/**
- * Created by admin on 2019/3/22.
- */
+import java.util.Scanner;
+
 public class IMClient {
     static final String HOST = System.getProperty("host", "127.0.0.1");
     static final int PORT = Integer.parseInt(System.getProperty("port", "8888"));
@@ -20,13 +19,14 @@ public class IMClient {
     private static SocketChannel socketChannel;
 
     public static void main(String[] args) throws Exception {
-        start();
-        sendMsg("Hello Netty Server ,I am a common client");
-        // Configure the client.
-
+        new Thread(() -> bind()).start();
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            sendMsg(scanner.nextLine());
+        }
     }
 
-    public static void start(){
+    public static void bind(){
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();
@@ -48,7 +48,8 @@ public class IMClient {
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } finally {
+        }finally {
+            System.out.println("-----client.group.shutdown-----");
             group.shutdownGracefully();
         }
     }

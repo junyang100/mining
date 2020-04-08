@@ -11,7 +11,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("server receive message :" + msg);
         ctx.channel().writeAndFlush("yes server already accept your message" + msg);
-        ctx.close();
+//        ctx.close();
     }
 
     @Override
