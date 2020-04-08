@@ -14,7 +14,7 @@ import io.netty.handler.codec.string.StringEncoder;
  */
 public class IMClient {
     static final String HOST = System.getProperty("host", "127.0.0.1");
-    static final int PORT = Integer.parseInt(System.getProperty("port", "6666"));
+    static final int PORT = Integer.parseInt(System.getProperty("port", "8888"));
     static final int SIZE = Integer.parseInt(System.getProperty("size", "256"));
 
     private static SocketChannel socketChannel;
