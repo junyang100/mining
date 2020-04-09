@@ -26,4 +26,18 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
         System.out.println("有客户端连接：" + ctx.channel().remoteAddress().toString());
         clients.add(ctx);
     }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("有客户端断开：" + ctx.channel().remoteAddress().toString());
+        clients.remove(ctx);
+    }
+
+    public static String sendMsg(String msg) {
+        System.out.println("当前客户端数：" + clients.size());
+        for (ChannelHandlerContext c : clients) {
+            c.channel().writeAndFlush("server send=" + msg);
+        }
+        return "success";
+    }
 }
