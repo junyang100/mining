@@ -1,30 +1,44 @@
 package com.mine.service;
 
+import com.alibaba.fastjson.JSON;
+import com.mine.pojo.IMessage;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.AttributeKey;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static List<ChannelHandlerContext> clients = new ArrayList();
+    private static List<Channel> clients = new ArrayList();
+
+    public static final AttributeKey<String> SESSION_KEY =
+            AttributeKey.valueOf("SESSION_KEY");
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("server receive message :" + msg);
-        for (ChannelHandlerContext c : clients) {
-            if (!c.equals(ctx)) {
-                c.channel().writeAndFlush("server send=" + msg);
+        IMessage iMessage = JSON.parseObject(msg.toString(),IMessage.class);
+        System.out.println("server receive message :" + iMessage.toString());
+        if (iMessage.getType() == 1) {
+            ctx.channel().attr(SESSION_KEY).set(iMessage.getSessionId());
+            clients.add(ctx.channel());
+            ctx.channel().writeAndFlush("login success");
+        } else {
+            for (Channel channel:clients) {
+                String sessionId = channel.attr(SESSION_KEY).get();
+                if (!iMessage.getSessionId().equals(sessionId)) {
+                    channel.writeAndFlush(iMessage.getMsg());
+                }
             }
         }
-//        ctx.close();
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         System.out.println("有客户端连接：" + ctx.channel().remoteAddress().toString());
-        clients.add(ctx);
+//        clients.add(ctx);
     }
 
     @Override
@@ -35,8 +49,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     public static String sendMsg(String msg) {
         System.out.println("当前客户端数：" + clients.size());
-        for (ChannelHandlerContext c : clients) {
-            c.channel().writeAndFlush("server send=" + msg);
+        for (Channel c : clients) {
+            c.writeAndFlush("server send=" + msg);
         }
         return "success";
     }

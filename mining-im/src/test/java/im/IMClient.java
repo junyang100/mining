@@ -1,5 +1,7 @@
 package im;
 
+import com.alibaba.fastjson.JSON;
+import com.mine.pojo.IMessage;
 import com.sun.corba.se.impl.protocol.giopmsgheaders.MessageBase;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -8,8 +10,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.util.AttributeKey;
 
+import java.util.Random;
 import java.util.Scanner;
+import java.util.UUID;
 
 public class IMClient {
     static final String HOST = System.getProperty("host", "127.0.0.1");
@@ -20,13 +25,23 @@ public class IMClient {
 
     public static void main(String[] args) throws Exception {
         new Thread(() -> bind()).start();
+        //login
+        String sessionId = UUID.randomUUID().toString();
+        IMessage loginMsg = new IMessage();
+        loginMsg.setType((byte) 1);
+        loginMsg.setSessionId(sessionId);
+        Thread.sleep(1000);
+        sendMsg(JSON.toJSONString(loginMsg));
+        //chat
         Scanner scanner = new Scanner(System.in);
+        loginMsg.setType((byte) 2);
         while (true) {
-            sendMsg(scanner.nextLine());
+            loginMsg.setMsg(scanner.nextLine());
+            sendMsg(JSON.toJSONString(loginMsg));
         }
     }
 
-    public static void bind(){
+    public static void bind() {
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();
@@ -48,7 +63,7 @@ public class IMClient {
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             System.out.println("-----client.group.shutdown-----");
             group.shutdownGracefully();
         }
