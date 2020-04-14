@@ -25,18 +25,20 @@ public class IMClient {
 
     public static void main(String[] args) throws Exception {
         new Thread(() -> bind()).start();
+        Thread.sleep(2000);
         //login
-        String sessionId = UUID.randomUUID().toString();
         IMessage loginMsg = new IMessage();
         loginMsg.setType((byte) 1);
-        loginMsg.setSessionId(sessionId);
-        Thread.sleep(1000);
+        loginMsg.setSender("client" + new Random().nextInt());
         sendMsg(JSON.toJSONString(loginMsg));
+//        Thread.sleep(2000);
         //chat
         Scanner scanner = new Scanner(System.in);
         loginMsg.setType((byte) 2);
         while (true) {
-            loginMsg.setMsg(scanner.nextLine());
+            String line[] = scanner.nextLine().split(":");
+            loginMsg.setReceiver(line[0]);
+            loginMsg.setMsg(line[1]);
             sendMsg(JSON.toJSONString(loginMsg));
         }
     }
