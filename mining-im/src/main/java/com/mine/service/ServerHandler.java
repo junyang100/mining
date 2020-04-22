@@ -5,6 +5,8 @@ import com.mine.pojo.IMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
 import org.apache.commons.lang.StringUtils;
 
@@ -25,6 +27,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
             clients.put(iMessage.getSender(), ctx.channel());
             ctx.channel().attr(SESSION_KEY).set(iMessage.getSender());
             ctx.channel().writeAndFlush("login success");
+        } else if (iMessage.getType() == 3) {
+            //do nothing
+            System.out.println("idle request");
         } else {
             String sender = ctx.channel().attr(SESSION_KEY).get();
             if (StringUtils.isBlank(sender)) {
@@ -41,8 +46,25 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
+            IdleState state = ((IdleStateEvent) evt).state();
+            if (state == IdleState.READER_IDLE) {
+                ctx.channel().close();
+            }
+        } else {
+            super.userEventTriggered(ctx, evt);
+        }
+    }
+
+    @Override
     public void channelActive(ChannelHandlerContext ctx) {
         System.out.println("有客户端连接：" + ctx.channel().remoteAddress().toString());
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
     }
 
     @Override
