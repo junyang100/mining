@@ -20,16 +20,20 @@ public class IMClient {
     static final int PORT = Integer.parseInt(System.getProperty("port", "8888"));
     static final int SIZE = Integer.parseInt(System.getProperty("size", "256"));
 
-    private static SocketChannel socketChannel;
+    private SocketChannel socketChannel;
+    private NioEventLoopGroup workGroup = new NioEventLoopGroup(4);
+    private Channel channel;
+    private Bootstrap bootstrap;
 
     public static void main(String[] args) throws Exception {
-        new Thread(() -> bind()).start();
+        IMClient client = new IMClient();
+        new Thread(() -> client.bind()).start();
         Thread.sleep(2000);
         //login
         IMessage loginMsg = new IMessage();
         loginMsg.setType((byte) 1);
         loginMsg.setSender("client" + new Random().nextInt());
-        sendMsg(JSON.toJSONString(loginMsg));
+        client.sendMsg(JSON.toJSONString(loginMsg));
 //        Thread.sleep(2000);
         //chat
         Scanner scanner = new Scanner(System.in);
@@ -38,15 +42,15 @@ public class IMClient {
             String line[] = scanner.nextLine().split(":");
             loginMsg.setReceiver(line[0]);
             loginMsg.setMsg(line[1]);
-            sendMsg(JSON.toJSONString(loginMsg));
+            client.sendMsg(JSON.toJSONString(loginMsg));
         }
     }
 
-    public static void bind() {
-        EventLoopGroup group = new NioEventLoopGroup();
+    public void bind() {
+        System.out.println("bind start");
         try {
-            Bootstrap b = new Bootstrap();
-            b.group(group)
+            bootstrap = new Bootstrap();
+            bootstrap.group(workGroup)
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.TCP_NODELAY, true)
                     .handler(new ChannelInitializer<SocketChannel>() {
@@ -56,22 +60,30 @@ public class IMClient {
                             p.addLast(new IdleStateHandler(0, 5, 0, TimeUnit.SECONDS));
                             p.addLast("decoder", new StringDecoder());
                             p.addLast("encoder", new StringEncoder());
-                            p.addLast(new IMHandler());
+//                            p.addLast(new ReconnectionHandler(b, HOST, PORT));
+                            p.addLast(new IMHandler(IMClient.this));
                         }
                     });
-            ChannelFuture future = b.connect(HOST, PORT).sync();
-//            future.channel().writeAndFlush("Hello Netty Server ,I am a common client");
-            socketChannel = (SocketChannel) future.channel();
-            future.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            System.out.println("-----client.group.shutdown-----");
-            group.shutdownGracefully();
+            doConnect();
+        } catch (Exception e) {
+            System.out.println(e);
         }
+//        finally {
+//            System.out.println("-----client.group.shutdown-----");
+//            group.shutdownGracefully();
+//        }
     }
 
-    public static void sendMsg(String msg) {
+    public void doConnect() throws InterruptedException {
+        if (channel != null && channel.isActive()) {
+            return;
+        }
+        ChannelFuture future = bootstrap.connect(HOST, PORT).sync();
+        socketChannel = (SocketChannel) future.channel();
+        future.channel().closeFuture().sync();
+    }
+
+    public void sendMsg(String msg) {
         socketChannel.writeAndFlush(msg);
     }
 
