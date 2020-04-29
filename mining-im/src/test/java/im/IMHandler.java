@@ -1,20 +1,11 @@
 package im;
 
 import com.alibaba.fastjson.JSON;
-import com.mine.pojo.IMessage;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import com.mine.proto.IMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.EventLoop;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.netty.util.CharsetUtil;
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timer;
-
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by admin on 2019/3/22.
@@ -38,10 +29,9 @@ public class IMHandler extends ChannelInboundHandlerAdapter {
             IdleState state = ((IdleStateEvent) evt).state();
             if (state == IdleState.WRITER_IDLE) {
                 // write heartbeat to server
-                IMessage loginMsg = new IMessage();
-                loginMsg.setType((byte) 3);
-                loginMsg.setMsg("idle");
-                ctx.writeAndFlush(JSON.toJSONString(loginMsg));
+                IMessage.Message iMessage = IMessage.Message.newBuilder()
+                        .setType(3).setSender("idle").setMsg("idle").build();
+                ctx.writeAndFlush(iMessage);
             }
         } else {
             super.userEventTriggered(ctx, evt);
@@ -50,7 +40,7 @@ public class IMHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        final EventLoop eventLoop = ctx.channel().eventLoop();
+//        final EventLoop eventLoop = ctx.channel().eventLoop();
         boolean rs = false;
         while (!rs){
             try {
@@ -58,10 +48,10 @@ public class IMHandler extends ChannelInboundHandlerAdapter {
                 client.doConnect();
                 Thread.sleep(3000);
                 //todo 断线重连后的登陆问题 是否需要重新登陆
-                IMessage loginMsg = new IMessage();
-                loginMsg.setType((byte) 1);
-                loginMsg.setSender("client" + new Random().nextInt());
-                client.sendMsg(JSON.toJSONString(loginMsg));
+//                IMessage loginMsg = new IMessage();
+//                loginMsg.setType((byte) 1);
+//                loginMsg.setSender("client" + new Random().nextInt());
+//                client.sendMsg(JSON.toJSONString(loginMsg));
                 rs=true;
             } catch (Exception e) {
                 System.out.println("reconnection error");

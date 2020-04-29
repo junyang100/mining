@@ -1,7 +1,6 @@
 package com.mine.service;
 
-import com.alibaba.fastjson.JSON;
-import com.mine.pojo.IMessage;
+import com.mine.proto.IMessage;
 import io.netty.channel.*;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -20,7 +19,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        IMessage iMessage = JSON.parseObject(msg.toString(), IMessage.class);
+        IMessage.Message iMessage = (IMessage.Message)msg;
         System.out.println("server receive message :" + iMessage.toString());
         if (iMessage.getType() == 1) {
             clients.put(iMessage.getSender(), ctx.channel());

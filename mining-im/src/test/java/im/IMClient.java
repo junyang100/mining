@@ -7,6 +7,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -30,19 +31,23 @@ public class IMClient {
         new Thread(() -> client.bind()).start();
         Thread.sleep(2000);
         //login
-        IMessage loginMsg = new IMessage();
-        loginMsg.setType((byte) 1);
-        loginMsg.setSender("client" + new Random().nextInt());
-        client.sendMsg(JSON.toJSONString(loginMsg));
+        com.mine.proto.IMessage.Message iMessage = com.mine.proto.IMessage.Message.newBuilder()
+                .setType(1).setSender("client" + new Random().nextInt()).build();
+//        IMessage loginMsg = new IMessage();
+//        loginMsg.setType((byte) 1);
+//        loginMsg.setSender("client" + new Random().nextInt());
+        client.sendMsg(iMessage);
 //        Thread.sleep(2000);
         //chat
         Scanner scanner = new Scanner(System.in);
-        loginMsg.setType((byte) 2);
         while (true) {
             String line[] = scanner.nextLine().split(":");
-            loginMsg.setReceiver(line[0]);
-            loginMsg.setMsg(line[1]);
-            client.sendMsg(JSON.toJSONString(loginMsg));
+            com.mine.proto.IMessage.Message chatMsg = com.mine.proto.IMessage.Message.newBuilder()
+                    .setType(2).setSender(iMessage.getSender())
+                    .setReceiver(line[0]).setMsg(line[1]).build();
+//            loginMsg.setReceiver(line[0]);
+//            loginMsg.setMsg(line[1]);
+            client.sendMsg(chatMsg);
         }
     }
 
@@ -59,7 +64,7 @@ public class IMClient {
                             ChannelPipeline p = ch.pipeline();
                             p.addLast(new IdleStateHandler(0, 5, 0, TimeUnit.SECONDS));
                             p.addLast("decoder", new StringDecoder());
-                            p.addLast("encoder", new StringEncoder());
+                            p.addLast("encoder", new ProtobufEncoder());
 //                            p.addLast(new ReconnectionHandler(b, HOST, PORT));
                             p.addLast(new IMHandler(IMClient.this));
                         }
@@ -83,7 +88,7 @@ public class IMClient {
         future.channel().closeFuture().sync();
     }
 
-    public void sendMsg(String msg) {
+    public void sendMsg(com.mine.proto.IMessage.Message msg) {
         socketChannel.writeAndFlush(msg);
     }
 

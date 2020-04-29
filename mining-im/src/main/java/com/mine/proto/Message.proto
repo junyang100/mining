@@ -1,0 +1,13 @@
+syntax = "proto2";
+package proto;
+
+option java_package = "com.mine.proto";
+option java_outer_classname = "IMessage";
+
+message Message {
+    required int32 type = 1;
+    required string sender = 2;
+    optional string receiver = 3;
+    optional string msg = 4;
+    optional string sessionId = 5;
+}
