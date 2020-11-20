@@ -1,13 +1,17 @@
 package com.mine.service;
 
-import com.mine.proto.IMessage;
-import io.netty.channel.*;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
+import com.alibaba.fastjson.JSON;
+import com.mine.domain.*;
+import com.mine.utils.CacheUtil;
+import com.mine.utils.FileUtil;
+import com.mine.utils.MsgUtil;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
-import io.netty.util.Timeout;
-import org.apache.commons.lang.StringUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,45 +23,68 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        IMessage.Message iMessage = (IMessage.Message)msg;
-        System.out.println("server receive message :" + iMessage.toString());
-        if (iMessage.getType() == 1) {
-            clients.put(iMessage.getSender(), ctx.channel());
-            ctx.channel().attr(SESSION_KEY).set(iMessage.getSender());
-            ctx.channel().writeAndFlush("login success");
-        } else if (iMessage.getType() == 3) {
-            //do nothing
-            System.out.println("idle request");
-        } else {
-            String sender = ctx.channel().attr(SESSION_KEY).get();
-            if (StringUtils.isBlank(sender)) {
-                ctx.channel().writeAndFlush("need login");
-                return;
-            }
-            Channel toChannel = clients.get(iMessage.getReceiver());
-            if (toChannel == null) {
-                ctx.channel().writeAndFlush("receiver not online");
-                return;
-            }
-            toChannel.writeAndFlush(iMessage.getMsg());
+        //数据格式验证
+        if (!(msg instanceof FileTransferProtocol)) return;
+
+        FileTransferProtocol fileTransferProtocol = (FileTransferProtocol) msg;
+        //0传输文件'请求'、1文件传输'指令'、2文件传输'数据'
+        switch (fileTransferProtocol.getTransferType()) {
+            case 0:
+                FileDescInfo fileDescInfo = (FileDescInfo) fileTransferProtocol.getTransferObj();
+
+                //断点续传信息，实际应用中需要将断点续传信息保存到数据库中
+                FileBurstInstruct fileBurstInstructOld = CacheUtil.burstDataMap.get(fileDescInfo.getFileName());
+                if (null != fileBurstInstructOld) {
+                    if (fileBurstInstructOld.getStatus() == Constants.FileStatus.COMPLETE) {
+                        CacheUtil.burstDataMap.remove(fileDescInfo.getFileName());
+                    }
+                    //传输完成删除断点信息
+                    System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " bugstack虫洞栈服务端，接收客户端传输文件请求[断点续传]。" + JSON.toJSONString(fileBurstInstructOld));
+                    ctx.writeAndFlush(MsgUtil.buildTransferInstruct(fileBurstInstructOld));
+                    return;
+                }
+
+                //发送信息
+                FileTransferProtocol sendFileTransferProtocol = MsgUtil.buildTransferInstruct(Constants.FileStatus.BEGIN, fileDescInfo.getFileUrl(), 0);
+                ctx.writeAndFlush(sendFileTransferProtocol);
+                System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " bugstack虫洞栈服务端，接收客户端传输文件请求。" + JSON.toJSONString(fileDescInfo));
+                break;
+            case 2:
+                FileBurstData fileBurstData = (FileBurstData) fileTransferProtocol.getTransferObj();
+                FileBurstInstruct fileBurstInstruct = FileUtil.writeFile("E://netty", fileBurstData);
+
+                //保存断点续传信息
+                CacheUtil.burstDataMap.put(fileBurstData.getFileName(), fileBurstInstruct);
+
+                ctx.writeAndFlush(MsgUtil.buildTransferInstruct(fileBurstInstruct));
+                System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " bugstack虫洞栈服务端，接收客户端传输文件数据。" + JSON.toJSONString(fileBurstData));
+
+                //传输完成删除断点信息
+                if (fileBurstInstruct.getStatus() == Constants.FileStatus.COMPLETE) {
+                    CacheUtil.burstDataMap.remove(fileBurstData.getFileName());
+                }
+                break;
+            default:
+                break;
         }
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (evt instanceof IdleStateEvent) {
-            IdleState state = ((IdleStateEvent) evt).state();
-            if (state == IdleState.READER_IDLE) {
-                ctx.channel().close();
-            }
-        } else {
-            super.userEventTriggered(ctx, evt);
-        }
+//        if (evt instanceof IdleStateEvent) {
+//            IdleState state = ((IdleStateEvent) evt).state();
+//            if (state == IdleState.READER_IDLE) {
+//                ctx.channel().close();
+//            }
+//        } else {
+//            super.userEventTriggered(ctx, evt);
+//        }
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         System.out.println("有客户端连接：" + ctx.channel().remoteAddress().toString());
+        ctx.channel().writeAndFlush("connect success");
     }
 
     @Override
